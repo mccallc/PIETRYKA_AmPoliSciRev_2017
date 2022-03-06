@@ -1,0 +1,703 @@
+
+> # ==============================================================================
+> # CREATED BY: PIETRYKA
+> # DATE:       November 07, 2016
+> # PURPOSE:    THIS FILE RUNS THE MODELS PRESENTED IN TABLES 1 AND 2 OF PIETRYKA
+> #             AND DEBATS' 2017 APSR ARTICLE
+> # DATA INPUT: 'Alexandria_Data.tsv', 'Newport_Data.tsv'
+> # R VERSION:  FILE WAS CREATED WHILE USING R VERSION 3.3.1 (2016-06-21)
+> # QUESTIONS:  mpietryka@fsu.edu
+> # ==============================================================================
+> 
+> 
+> #===============================================================================
+> #   1. PRELIMINARIES ####
+> #===============================================================================
+> 
+> # LOAD PACKAGES
+> library(readr)   # readr_1.0.0: READ IN DATA WITH 'read_tsv()'
+
+> library(dplyr)   # dplyr_0.5.0: HELPER FUNCTIONS, e.g., '%>%'
+
+> library(texreg)  # texreg_1.36.7: PRINT SUMMARIES OF DATA WITH 'screenreg()'
+
+> # LOAD DATA
+> alexandria_data <- read_tsv("Alexandria_Data.tsv")
+[1mindexing[0m [34mAlexandria_Data.tsv[0m [=================================] [32m18.36GB/s[0m, eta: [36m 0s[0m                                                                                                                       
+> newport_data <- read_tsv("Newport_Data.tsv")
+[1mindexing[0m [34mNewport_Data.tsv[0m [====================================] [32m27.97GB/s[0m, eta: [36m 0s[0m                                                                                                                       
+> #===============================================================================
+> #   2. IDENTIFY CONTROL VARIABLES ####
+> #===============================================================================
+> alexandria_controls <- c(
++   "hhwealth",    # Household wealth (thousands of dollars)"
++   "hhwealthlog", # ln(Household wealth)
++   "midstatus",   # Mid-status occupation
++   "highstatus",  # High-status occupation
++   "owner",       # Owns home?
++   "age",         # Age (years)
++   "agelog",      # ln(Age)
++   "church",      # Is church member?
++   "usborn"       # Is U.S. born?
++ ) %>%
++   paste(collapse = " + ")
+
+> newport_controls <- c(
++   "hhwealth",    # Household wealth (thousands of dollars)"
++   "hhwealthlog", # ln(Household wealth)
++   "midstatus",   # Mid-status occupation
++   "highstatus",  # High-status occupation
++   "owner",       # Owns home?
++   "age",         # Age (years)
++   "agelog",      # ln(Age)
++   "black",       # Is African American?"
++   "usborn"       # Is U.S. born?
++ )  %>%
++   paste(collapse = " + ")
+
+> #===============================================================================
+> #   3. RUN TURNOUT MODELS (TABLE 1) ####
+> #===============================================================================
+> 
+> # ------- ALEXANDRIA  ---------------- #
+> # TABLE 1, MODEL 1
+> alexandria_turnout_1 <- paste("turnout ~ ",
++                               alexandria_controls)  %>%
++   formula()  %>%
++   glm(data = alexandria_data,
++       family = binomial(link = "logit"))
+
+> summary(alexandria_turnout_1)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = alexandria_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.2163  -1.0034   0.4466   1.0346   2.1874  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -13.499585   2.146160  -6.290 3.17e-10 ***
+hhwealth     -0.010749   0.004001  -2.687  0.00721 ** 
+hhwealthlog   0.063200   0.020958   3.016  0.00256 ** 
+midstatus     0.687071   0.102829   6.682 2.36e-11 ***
+highstatus    0.863665   0.185733   4.650 3.32e-06 ***
+owner         0.765462   0.150094   5.100 3.40e-07 ***
+age          -0.090751   0.020322  -4.466 7.99e-06 ***
+agelog        4.377918   0.808076   5.418 6.04e-08 ***
+church        0.881058   0.106103   8.304  < 2e-16 ***
+usborn        0.723364   0.119131   6.072 1.26e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3071.3  on 2215  degrees of freedom
+Residual deviance: 2677.5  on 2206  degrees of freedom
+AIC: 2697.5
+
+Number of Fisher Scoring iterations: 4
+
+
+> # TABLE 1, MODEL 2
+> alexandria_turnout_2 <- paste("turnout ~ ",
++                               alexandria_controls,
++                               "+ z1ev")  %>%
++   formula()  %>%
++   glm(data = alexandria_data,
++       family = binomial(link = "logit"))
+
+> summary(alexandria_turnout_2)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = alexandria_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.2022  -1.0277   0.4514   1.0311   2.2591  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -13.806349   2.147518  -6.429 1.28e-10 ***
+hhwealth     -0.010181   0.003989  -2.552 0.010708 *  
+hhwealthlog   0.041469   0.021610   1.919 0.054981 .  
+midstatus     0.416819   0.119465   3.489 0.000485 ***
+highstatus    0.633242   0.192876   3.283 0.001026 ** 
+owner         0.801812   0.151055   5.308 1.11e-07 ***
+age          -0.097266   0.020372  -4.775 1.80e-06 ***
+agelog        4.614987   0.810278   5.696 1.23e-08 ***
+church        0.879039   0.106616   8.245  < 2e-16 ***
+usborn        0.606375   0.122975   4.931 8.19e-07 ***
+z1ev         -0.162100   0.038017  -4.264 2.01e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3071.3  on 2215  degrees of freedom
+Residual deviance: 2658.7  on 2205  degrees of freedom
+AIC: 2680.7
+
+Number of Fisher Scoring iterations: 4
+
+
+> # TABLE 1, MODEL 3
+> alexandria_turnout_3 <- paste("turnout ~ ",
++                               alexandria_controls,
++                               "+ z1ev + z1elite_avgprox")  %>%
++   formula()  %>%
++   glm(data = alexandria_data,
++       family = binomial(link = "logit"))
+
+> summary(alexandria_turnout_3)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = alexandria_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.2585  -1.0115   0.4514   1.0043   2.2397  
+
+Coefficients:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)     -14.243802   2.167173  -6.573 4.95e-11 ***
+hhwealth         -0.010106   0.003985  -2.536   0.0112 *  
+hhwealthlog       0.043322   0.021712   1.995   0.0460 *  
+midstatus         0.290053   0.123446   2.350   0.0188 *  
+highstatus        0.586651   0.194023   3.024   0.0025 ** 
+owner             0.780924   0.151789   5.145 2.68e-07 ***
+age              -0.099228   0.020560  -4.826 1.39e-06 ***
+agelog            4.737683   0.817287   5.797 6.76e-09 ***
+church            0.582148   0.125135   4.652 3.28e-06 ***
+usborn            0.543215   0.124183   4.374 1.22e-05 ***
+z1ev             -0.235368   0.041236  -5.708 1.14e-08 ***
+z1elite_avgprox   0.556577   0.125256   4.444 8.85e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3071.3  on 2215  degrees of freedom
+Residual deviance: 2635.5  on 2204  degrees of freedom
+AIC: 2659.5
+
+Number of Fisher Scoring iterations: 4
+
+
+> # ------- NEWPORT  ---------------- #
+> 
+> # TABLE 1, MODEL 4
+> newport_turnout_1 <- paste("turnout ~ ",
++                            newport_controls)  %>%
++   formula()  %>%
++   glm(data = newport_data,
++       family = binomial(link = "logit"))
+
+> summary(newport_turnout_1)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = newport_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.6816  -0.8694  -0.7592   1.0261   1.8575  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -0.564319   1.322343  -0.427 0.669556    
+hhwealth    -0.001220   0.003235  -0.377 0.706137    
+hhwealthlog -0.071970   0.014559  -4.943 7.68e-07 ***
+midstatus    0.145043   0.081606   1.777 0.075509 .  
+highstatus   0.246757   0.189264   1.304 0.192311    
+owner        1.641246   0.097187  16.888  < 2e-16 ***
+age         -0.004456   0.014675  -0.304 0.761401    
+agelog      -0.140636   0.523778  -0.269 0.788311    
+black        1.440310   0.424799   3.391 0.000697 ***
+usborn       0.129208   0.086105   1.501 0.133463    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 4611.1  on 3415  degrees of freedom
+Residual deviance: 4242.9  on 3406  degrees of freedom
+AIC: 4262.9
+
+Number of Fisher Scoring iterations: 4
+
+
+> # TABLE 1, MODEL 5
+> newport_turnout_2 <- paste("turnout ~ ",
++                            newport_controls,
++                            "+ z1ev")  %>%
++   formula()  %>%
++   glm(data = newport_data,
++       family = binomial(link = "logit"))
+
+> summary(newport_turnout_2)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = newport_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.7161  -0.8828  -0.7480   1.0215   1.9462  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -0.2130608  1.3314818  -0.160 0.872867    
+hhwealth    -0.0013707  0.0031600  -0.434 0.664456    
+hhwealthlog -0.0659428  0.0146959  -4.487 7.22e-06 ***
+midstatus    0.3329138  0.1001597   3.324 0.000888 ***
+highstatus   0.4350551  0.1982678   2.194 0.028215 *  
+owner        1.6523718  0.0975372  16.941  < 2e-16 ***
+age          0.0002873  0.0148001   0.019 0.984515    
+agelog      -0.3417125  0.5291553  -0.646 0.518428    
+black        1.3147690  0.4276481   3.074 0.002109 ** 
+usborn       0.1706258  0.0872394   1.956 0.050485 .  
+z1ev         0.0957847  0.0289110   3.313 0.000923 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 4611.1  on 3415  degrees of freedom
+Residual deviance: 4231.9  on 3405  degrees of freedom
+AIC: 4253.9
+
+Number of Fisher Scoring iterations: 4
+
+
+> # TABLE 1, MODEL 6
+> newport_turnout_3 <- paste("turnout ~ ",
++                            newport_controls,
++                            "+ z1ev + z1elite_avgprox")  %>%
++   formula()  %>%
++   glm(data = newport_data,
++       family = binomial(link = "logit"))
+
+> summary(newport_turnout_3)
+
+Call:
+glm(formula = ., family = binomial(link = "logit"), data = newport_data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.6940  -0.8945  -0.7221   1.0384   2.8281  
+
+Coefficients:
+                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)     -1.365696   1.356571  -1.007  0.31407    
+hhwealth        -0.001871   0.003230  -0.579  0.56241    
+hhwealthlog     -0.066753   0.014718  -4.535 5.75e-06 ***
+midstatus        0.190651   0.103770   1.837  0.06617 .  
+highstatus       0.403886   0.200466   2.015  0.04393 *  
+owner            1.578218   0.098602  16.006  < 2e-16 ***
+age             -0.007031   0.014978  -0.469  0.63876    
+agelog           0.010461   0.536531   0.019  0.98444    
+black            1.298295   0.426567   3.044  0.00234 ** 
+usborn           0.210967   0.087981   2.398  0.01649 *  
+z1ev            -0.008019   0.034635  -0.232  0.81689    
+z1elite_avgprox  0.716618   0.135705   5.281 1.29e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 4611.1  on 3415  degrees of freedom
+Residual deviance: 4197.8  on 3404  degrees of freedom
+AIC: 4221.8
+
+Number of Fisher Scoring iterations: 4
+
+
+> # ------- ANOVAS  ---------------- #
+> anova(alexandria_turnout_1, alexandria_turnout_3, test = "Chisq")
+Analysis of Deviance Table
+
+Model 1: turnout ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + church + usborn
+Model 2: turnout ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + church + usborn + z1ev + z1elite_avgprox
+  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+1      2206     2677.5                          
+2      2204     2635.5  2   41.986 7.637e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> anova(newport_turnout_1, newport_turnout_3, test = "Chisq")
+Analysis of Deviance Table
+
+Model 1: turnout ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + black + usborn
+Model 2: turnout ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + black + usborn + z1ev + z1elite_avgprox
+  Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+1      3406     4242.9                          
+2      3404     4197.8  2    45.14 1.577e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> #===============================================================================
+> #   4. VOTE CHOICE MODELS (TABLE 2) ####
+> #===============================================================================
+> 
+> # ------- ALEXANDRIA  ---------------- #
+> 
+> # TABLE 2, MODEL 1
+> alexandria_votechoice_1 <- paste("opp ~ ",
++                                  alexandria_controls)  %>%
++   formula()  %>%
++   lm(data = filter(alexandria_data, turnout == 1))
+
+> summary(alexandria_votechoice_1)
+
+Call:
+lm(formula = ., data = filter(alexandria_data, turnout == 1))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.8627 -0.4266  0.2486  0.3793  0.6679 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.610078   0.650856   0.937   0.3488    
+hhwealth     0.001969   0.001246   1.581   0.1142    
+hhwealthlog  0.001260   0.006412   0.196   0.8443    
+midstatus    0.042201   0.030970   1.363   0.1733    
+highstatus   0.027799   0.045435   0.612   0.5408    
+owner        0.041646   0.035907   1.160   0.2464    
+age          0.003045   0.005891   0.517   0.6054    
+agelog      -0.106024   0.242681  -0.437   0.6623    
+church       0.062204   0.027392   2.271   0.0233 *  
+usborn       0.224423   0.036479   6.152 1.06e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.4318 on 1118 degrees of freedom
+Multiple R-squared:  0.04946,	Adjusted R-squared:  0.04181 
+F-statistic: 6.464 on 9 and 1118 DF,  p-value: 5.308e-09
+
+
+> # TABLE 2, MODEL 2
+> alexandria_votechoice_2 <- paste("opp ~ ",
++                                  alexandria_controls,
++                                  "+ z1ev")  %>%
++   formula()  %>%
++   lm(data = filter(alexandria_data, turnout == 1))
+
+> summary(alexandria_votechoice_2)
+
+Call:
+lm(formula = ., data = filter(alexandria_data, turnout == 1))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.8559 -0.4423  0.2547  0.3777  0.7437 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.5561652  0.6500938   0.856   0.3924    
+hhwealth     0.0020177  0.0012435   1.623   0.1050    
+hhwealthlog -0.0009256  0.0064730  -0.143   0.8863    
+midstatus    0.0084868  0.0343111   0.247   0.8047    
+highstatus  -0.0017485  0.0471907  -0.037   0.9705    
+owner        0.0411438  0.0358413   1.148   0.2512    
+age          0.0021748  0.0058923   0.369   0.7121    
+agelog      -0.0699527  0.2427571  -0.288   0.7733    
+church       0.0634795  0.0273476   2.321   0.0205 *  
+usborn       0.2042531  0.0374857   5.449 6.24e-08 ***
+z1ev        -0.0291092  0.0128550  -2.264   0.0237 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.431 on 1117 degrees of freedom
+Multiple R-squared:  0.0538,	Adjusted R-squared:  0.04533 
+F-statistic: 6.352 on 10 and 1117 DF,  p-value: 1.515e-09
+
+
+> # TABLE 2, MODEL 3
+> alexandria_votechoice_3 <- paste("opp ~ ",
++                                  alexandria_controls,
++                                  "+ z1ev + z1maj_avgprox + z1min_avgprox")  %>%
++   formula()  %>%
++   lm(data = filter(alexandria_data, turnout == 1))
+
+> summary(alexandria_votechoice_3)
+
+Call:
+lm(formula = ., data = filter(alexandria_data, turnout == 1))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.8984 -0.4202  0.2214  0.3585  0.7372 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    0.654802   0.646915   1.012  0.31167    
+hhwealth       0.001983   0.001235   1.605  0.10877    
+hhwealthlog   -0.004019   0.006469  -0.621  0.53454    
+midstatus      0.010408   0.034905   0.298  0.76562    
+highstatus     0.002144   0.046938   0.046  0.96358    
+owner          0.047615   0.035640   1.336  0.18183    
+age            0.002594   0.005855   0.443  0.65781    
+agelog        -0.094678   0.241319  -0.392  0.69488    
+church         0.094403   0.033609   2.809  0.00506 ** 
+usborn         0.197870   0.037534   5.272 1.62e-07 ***
+z1ev          -0.008182   0.014011  -0.584  0.55936    
+z1maj_avgprox  0.225079   0.071592   3.144  0.00171 ** 
+z1min_avgprox -0.303572   0.072421  -4.192 2.99e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.428 on 1115 degrees of freedom
+Multiple R-squared:  0.06885,	Adjusted R-squared:  0.05883 
+F-statistic:  6.87 on 12 and 1115 DF,  p-value: 4.333e-12
+
+
+> # ------- NEWPORT  ---------------- #
+> 
+> # TABLE 2, MODEL 4
+> newport_votechoice_1 <- paste("dem ~ ",
++                               newport_controls)  %>%
++   formula()  %>%
++   lm(data = filter(newport_data, turnout == 1))
+
+> summary(newport_votechoice_1)
+
+Call:
+lm(formula = ., data = filter(newport_data, turnout == 1))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.60899 -0.32594 -0.08826  0.38133  0.74831 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.040241   0.401897   2.588 0.009746 ** 
+hhwealth    -0.002528   0.001744  -1.450 0.147421    
+hhwealthlog -0.001114   0.004145  -0.269 0.788210    
+midstatus   -0.075324   0.022209  -3.392 0.000715 ***
+highstatus  -0.034620   0.049584  -0.698 0.485167    
+owner       -0.054753   0.027405  -1.998 0.045921 *  
+age          0.004994   0.004273   1.169 0.242740    
+agelog      -0.178079   0.157663  -1.129 0.258890    
+black       -0.275358   0.091966  -2.994 0.002801 ** 
+usborn      -0.058599   0.023595  -2.484 0.013128 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3676 on 1371 degrees of freedom
+  (2 observations deleted due to missingness)
+Multiple R-squared:  0.02967,	Adjusted R-squared:  0.0233 
+F-statistic: 4.657 on 9 and 1371 DF,  p-value: 4.244e-06
+
+
+> # TABLE 2, MODEL 5
+> newport_votechoice_2 <- paste("dem ~ ",
++                               newport_controls,
++                               "+ z1ev")  %>%
++   formula()  %>%
++   lm(data = filter(newport_data, turnout == 1))
+
+> summary(newport_votechoice_2)
+
+Call:
+lm(formula = ., data = filter(newport_data, turnout == 1))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.73750 -0.31284 -0.06685  0.32616  0.67538 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.144367   0.392009   2.919  0.00357 ** 
+hhwealth    -0.002273   0.001701  -1.336  0.18173    
+hhwealthlog  0.002723   0.004067   0.670  0.50325    
+midstatus    0.059081   0.026799   2.205  0.02765 *  
+highstatus   0.093384   0.050626   1.845  0.06531 .  
+owner       -0.048456   0.026728  -1.813  0.07006 .  
+age          0.007314   0.004175   1.752  0.08004 .  
+agelog      -0.270241   0.154090  -1.754  0.07969 .  
+black       -0.369447   0.090338  -4.090 4.57e-05 ***
+usborn      -0.029220   0.023261  -1.256  0.20926    
+z1ev         0.065360   0.007679   8.511  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3583 on 1370 degrees of freedom
+  (2 observations deleted due to missingness)
+Multiple R-squared:  0.0784,	Adjusted R-squared:  0.07167 
+F-statistic: 11.65 on 10 and 1370 DF,  p-value: < 2.2e-16
+
+
+> # TABLE 2, MODEL 6
+> newport_votechoice_3 <- paste("dem ~ ",
++                               newport_controls,
++                               "+ z1ev + z1maj_avgprox + z1min_avgprox")  %>%
++   formula()  %>%
++   lm(data = filter(newport_data, turnout == 1))
+
+> summary(newport_votechoice_3)
+
+Call:
+lm(formula = ., data = filter(newport_data, turnout == 1))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.7332 -0.2979 -0.0556  0.3160  0.8938 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    1.134331   0.391040   2.901  0.00378 ** 
+hhwealth      -0.002534   0.001687  -1.502  0.13328    
+hhwealthlog    0.002413   0.004033   0.598  0.54978    
+midstatus      0.040628   0.027098   1.499  0.13403    
+highstatus     0.084860   0.050315   1.687  0.09192 .  
+owner         -0.046581   0.026545  -1.755  0.07952 .  
+age            0.007679   0.004150   1.851  0.06445 .  
+agelog        -0.278058   0.153290  -1.814  0.06991 .  
+black         -0.369800   0.089560  -4.129 3.86e-05 ***
+usborn        -0.030108   0.023297  -1.292  0.19645    
+z1ev           0.056317   0.008611   6.540 8.66e-11 ***
+z1maj_avgprox  0.296549   0.067347   4.403 1.15e-05 ***
+z1min_avgprox -0.203886   0.069541  -2.932  0.00343 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3553 on 1368 degrees of freedom
+  (2 observations deleted due to missingness)
+Multiple R-squared:  0.09556,	Adjusted R-squared:  0.08763 
+F-statistic: 12.05 on 12 and 1368 DF,  p-value: < 2.2e-16
+
+
+> # ------- ANOVAS  ---------------- #
+> anova(alexandria_votechoice_1, alexandria_votechoice_3)
+Analysis of Variance Table
+
+Model 1: opp ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + church + usborn
+Model 2: opp ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + church + usborn + z1ev + z1maj_avgprox + z1min_avgprox
+  Res.Df    RSS Df Sum of Sq      F    Pr(>F)    
+1   1118 208.47                                  
+2   1115 204.21  3    4.2516 7.7379 4.066e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> anova(newport_votechoice_1, newport_votechoice_3)
+Analysis of Variance Table
+
+Model 1: dem ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + black + usborn
+Model 2: dem ~ hhwealth + hhwealthlog + midstatus + highstatus + owner + 
+    age + agelog + black + usborn + z1ev + z1maj_avgprox + z1min_avgprox
+  Res.Df    RSS Df Sum of Sq      F    Pr(>F)    
+1   1371 185.23                                  
+2   1368 172.65  3     12.58 33.225 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> #===============================================================================
+> #   5. DISPLAY RESULTS ####
+> #===============================================================================
+> # TABLE 1
+> list(
++   alexandria_turnout_1,
++   alexandria_turnout_2,
++   alexandria_turnout_3,
++   newport_turnout_1,
++   newport_turnout_2,
++   newport_turnout_3
++ )  %>%
++   screenreg(digits = 3,
++             stars = .05)
+
+=============================================================================================
+                 Model 1      Model 2      Model 3      Model 4      Model 5      Model 6    
+---------------------------------------------------------------------------------------------
+(Intercept)        -13.500 *    -13.806 *    -14.244 *     -0.564       -0.213       -1.366  
+                    (2.146)      (2.148)      (2.167)      (1.322)      (1.331)      (1.357) 
+hhwealth            -0.011 *     -0.010 *     -0.010 *     -0.001       -0.001       -0.002  
+                    (0.004)      (0.004)      (0.004)      (0.003)      (0.003)      (0.003) 
+hhwealthlog          0.063 *      0.041        0.043 *     -0.072 *     -0.066 *     -0.067 *
+                    (0.021)      (0.022)      (0.022)      (0.015)      (0.015)      (0.015) 
+midstatus            0.687 *      0.417 *      0.290 *      0.145        0.333 *      0.191  
+                    (0.103)      (0.119)      (0.123)      (0.082)      (0.100)      (0.104) 
+highstatus           0.864 *      0.633 *      0.587 *      0.247        0.435 *      0.404 *
+                    (0.186)      (0.193)      (0.194)      (0.189)      (0.198)      (0.200) 
+owner                0.765 *      0.802 *      0.781 *      1.641 *      1.652 *      1.578 *
+                    (0.150)      (0.151)      (0.152)      (0.097)      (0.098)      (0.099) 
+age                 -0.091 *     -0.097 *     -0.099 *     -0.004        0.000       -0.007  
+                    (0.020)      (0.020)      (0.021)      (0.015)      (0.015)      (0.015) 
+agelog               4.378 *      4.615 *      4.738 *     -0.141       -0.342        0.010  
+                    (0.808)      (0.810)      (0.817)      (0.524)      (0.529)      (0.537) 
+church               0.881 *      0.879 *      0.582 *                                       
+                    (0.106)      (0.107)      (0.125)                                        
+usborn               0.723 *      0.606 *      0.543 *      0.129        0.171        0.211 *
+                    (0.119)      (0.123)      (0.124)      (0.086)      (0.087)      (0.088) 
+z1ev                             -0.162 *     -0.235 *                   0.096 *     -0.008  
+                                 (0.038)      (0.041)                   (0.029)      (0.035) 
+z1elite_avgprox                                0.557 *                                0.717 *
+                                              (0.125)                                (0.136) 
+black                                                       1.440 *      1.315 *      1.298 *
+                                                           (0.425)      (0.428)      (0.427) 
+---------------------------------------------------------------------------------------------
+AIC               2697.508     2680.728     2659.522     4262.907     4253.910     4221.766  
+BIC               2754.543     2743.466     2727.964     4324.269     4321.409     4295.401  
+Log Likelihood   -1338.754    -1329.364    -1317.761    -2121.453    -2115.955    -2098.883  
+Deviance          2677.508     2658.728     2635.522     4242.907     4231.910     4197.766  
+Num. obs.         2216         2216         2216         3416         3416         3416      
+=============================================================================================
+* p < 0.05
+
+> # TABLE 2
+> list(
++   alexandria_votechoice_1,
++   alexandria_votechoice_2,
++   alexandria_votechoice_3,
++   newport_votechoice_1,
++   newport_votechoice_2,
++   newport_votechoice_3
++ )  %>%
++   screenreg(digits = 3,
++             stars = .05)
+
+=====================================================================================
+               Model 1     Model 2     Model 3     Model 4     Model 5     Model 6   
+-------------------------------------------------------------------------------------
+(Intercept)       0.610       0.556       0.655       1.040 *     1.144 *     1.134 *
+                 (0.651)     (0.650)     (0.647)     (0.402)     (0.392)     (0.391) 
+hhwealth          0.002       0.002       0.002      -0.003      -0.002      -0.003  
+                 (0.001)     (0.001)     (0.001)     (0.002)     (0.002)     (0.002) 
+hhwealthlog       0.001      -0.001      -0.004      -0.001       0.003       0.002  
+                 (0.006)     (0.006)     (0.006)     (0.004)     (0.004)     (0.004) 
+midstatus         0.042       0.008       0.010      -0.075 *     0.059 *     0.041  
+                 (0.031)     (0.034)     (0.035)     (0.022)     (0.027)     (0.027) 
+highstatus        0.028      -0.002       0.002      -0.035       0.093       0.085  
+                 (0.045)     (0.047)     (0.047)     (0.050)     (0.051)     (0.050) 
+owner             0.042       0.041       0.048      -0.055 *    -0.048      -0.047  
+                 (0.036)     (0.036)     (0.036)     (0.027)     (0.027)     (0.027) 
+age               0.003       0.002       0.003       0.005       0.007       0.008  
+                 (0.006)     (0.006)     (0.006)     (0.004)     (0.004)     (0.004) 
+agelog           -0.106      -0.070      -0.095      -0.178      -0.270      -0.278  
+                 (0.243)     (0.243)     (0.241)     (0.158)     (0.154)     (0.153) 
+church            0.062 *     0.063 *     0.094 *                                    
+                 (0.027)     (0.027)     (0.034)                                     
+usborn            0.224 *     0.204 *     0.198 *    -0.059 *    -0.029      -0.030  
+                 (0.036)     (0.037)     (0.038)     (0.024)     (0.023)     (0.023) 
+z1ev                         -0.029 *    -0.008                   0.065 *     0.056 *
+                             (0.013)     (0.014)                 (0.008)     (0.009) 
+z1maj_avgprox                             0.225 *                             0.297 *
+                                         (0.072)                             (0.067) 
+z1min_avgprox                            -0.304 *                            -0.204 *
+                                         (0.072)                             (0.070) 
+black                                                -0.275 *    -0.369 *    -0.370 *
+                                                     (0.092)     (0.090)     (0.090) 
+-------------------------------------------------------------------------------------
+R^2               0.049       0.054       0.069       0.030       0.078       0.096  
+Adj. R^2          0.042       0.045       0.059       0.023       0.072       0.088  
+Num. obs.      1128        1128        1128        1381        1381        1381      
+=====================================================================================
+* p < 0.05
